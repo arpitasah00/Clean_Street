@@ -89,8 +89,10 @@ export default function Login() {
 
           <div className="mt-3 space-y-2">
             <button className="btn btn-ghost w-full py-1.5">
-              {" "}
-              Continue with Google
+              <span className="inline-flex items-center justify-center gap-2">
+                <GoogleIcon className="w-4 h-4" />
+                Continue with Google
+              </span>
             </button>
           </div>
 
@@ -106,5 +108,31 @@ export default function Login() {
         </div>
       </div>
     </section>
+  );
+}
+
+function GoogleIcon({ className = "w-4 h-4" }) {
+  // Stylized Google "G" using four colored pieces
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <g>
+        <path
+          fill="#EA4335"
+          d="M12 10.2v3.88h5.46c-.24 1.4-1.65 4.1-5.46 4.1-3.3 0-6-2.73-6-6.1s2.7-6.1 6-6.1c1.88 0 3.14.8 3.86 1.5l2.63-2.53C16.8 3.08 14.6 2 12 2 6.98 2 2.9 6.03 2.9 12S6.98 22 12 22c6.06 0 9.1-4.25 9.1-8.2 0-.55-.06-.87-.14-1.25H12z"
+        />
+        <path
+          fill="#4285F4"
+          d="M23 12c0-.82-.08-1.42-.2-2H12v3.88h6.14c-.12.98-.79 2.45-2.27 3.43l3.27 2.53C21.27 18.3 23 15.5 23 12z"
+        />
+        <path
+          fill="#FBBC05"
+          d="M6.54 14.32A5.8 5.8 0 0 1 6.2 12c0-.8.15-1.57.42-2.32L3.2 7.06A9.9 9.9 0 0 0 2 12c0 1.6.38 3.1 1.05 4.45l3.49-2.13z"
+        />
+        <path
+          fill="#34A853"
+          d="M12 22c2.6 0 4.78-.86 6.37-2.34l-3.27-2.53c-.9.6-2.1 1.02-3.1 1.02-2.38 0-4.4-1.57-5.13-3.69l-3.49 2.13C4.9 19.8 8.1 22 12 22z"
+        />
+      </g>
+    </svg>
   );
 }

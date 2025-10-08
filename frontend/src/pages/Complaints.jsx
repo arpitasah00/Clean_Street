@@ -9,15 +9,15 @@ export default function Complaints() {
 
   useEffect(() => {
     let mounted = true;
-    api("/complaints/mine", { token })
+    api("/complaints", { token })
       .then((data) => mounted && setItems(data))
       .finally(() => mounted && setLoading(false));
     return () => (mounted = false);
   }, [token]);
 
   return (
-    <section className="max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-display mb-4">My Complaints</h1>
+    <section className="max-w-6xl mx-auto px-4 py-6">
+      <h1 className="text-2xl font-display mb-4">All Complaints</h1>
       {loading ? (
         <p>Loading...</p>
       ) : (

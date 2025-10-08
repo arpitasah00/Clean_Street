@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 import path from "path";
 import multer from "multer";
 import ImageKit from "imagekit";
-
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import complaintRoutes from "./routes/complaints.js";

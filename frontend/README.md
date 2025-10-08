@@ -1,8 +1,10 @@
 # Clean Street Frontend
 
-React + Vite + Tailwind starter with Login and Register pages.
-
 cd frontend
 npm install
 npm run dev
+
+# Map setup (Leaflet + OpenStreetMap)
+The Report Issue page uses Leaflet with OpenStreetMap tiles.
+
 

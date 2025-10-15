@@ -8,6 +8,9 @@ import ImageKit from "imagekit";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import complaintRoutes from "./routes/complaints.js";
+import commentRoutes from "./routes/comments.js";
+import voteRoutes from "./routes/votes.js";
+import adminLogRoutes from "./routes/adminLogs.js";
 import passwordRoutes from "./routes/password.js";
 
 dotenv.config();
@@ -40,6 +43,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/users", passwordRoutes);
 app.use("/api/complaints", complaintRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/votes", voteRoutes);
+app.use("/api/admin-logs", adminLogRoutes);
 
 // Multer memory storage for uploading to ImageKit
 const upload = multer({

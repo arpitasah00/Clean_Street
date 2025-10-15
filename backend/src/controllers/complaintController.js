@@ -1,4 +1,5 @@
 import Complaint from "../models/Complaint.js";
+import { recordLog } from './adminLogController.js'
 import ImageKit from "imagekit";
 
 export async function listRecent(_req, res) {
@@ -69,4 +70,36 @@ export async function createComplaint(req, res) {
     address,
   });
   res.status(201).json(c);
+}
+
+export async function updateComplaintStatus(req, res) {
+  const { id } = req.params
+  const { status, assigned_to } = req.body
+  const allowed = ["received", "in_review", "resolved"]
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ message: "Invalid status" })
+  }
+  const patch = { status }
+  if (typeof assigned_to === 'string') patch.assigned_to = assigned_to
+  const updated = await Complaint.findByIdAndUpdate(
+    id,
+    { $set: patch },
+    { new: true }
+  )
+  if (!updated) return res.status(404).json({ message: 'Complaint not found' })
+  // Log
+  await recordLog(req.user.id, 'update_status')
+  res.json(updated)
+}
+
+export async function deleteComplaint(req, res) {
+  const { id } = req.params
+  const doc = await Complaint.findById(id)
+  if (!doc) return res.status(404).json({ message: 'Complaint not found' })
+  if (String(doc.user_id) !== String(req.user.id)) {
+    return res.status(403).json({ message: 'You can delete only your own complaint' })
+  }
+  await Complaint.deleteOne({ _id: id })
+  await recordLog(req.user.id, 'delete_complaint')
+  res.json({ ok: true })
 }

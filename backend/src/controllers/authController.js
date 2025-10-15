@@ -8,12 +8,22 @@ function signToken(user) {
 
 export async function register(req, res) {
   try {
-    const { name, email, password, location, role } = req.body
+    const { name, email, password, location, phone, role, admin_code } = req.body
     if (!name || !email || !password) return res.status(400).json({ message: 'Missing fields' })
     const existing = await User.findOne({ email })
     if (existing) return res.status(409).json({ message: 'Email already in use' })
     const hash = await bcrypt.hash(password, 10)
-    const user = await User.create({ name, email, password: hash, location: location || '', role: role || 'user' })
+    // Allow 'admin' only if admin_code matches env; otherwise only 'user' or 'volunteer'
+    let safeRole = 'user'
+    if (role === 'volunteer') safeRole = 'volunteer'
+    if (role === 'admin') {
+      const expected = process.env.ADMIN_SIGNUP_CODE || ''
+      if (!expected || admin_code !== expected) {
+        return res.status(403).json({ message: 'Invalid admin access code' })
+      }
+      safeRole = 'admin'
+    }
+    const user = await User.create({ name, email, password: hash, location: location || '', phone: phone || '', role: safeRole })
     const token = signToken(user)
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role, location: user.location, profile_photo: user.profile_photo } })
   } catch (err) {

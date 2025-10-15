@@ -11,8 +11,15 @@ export default function Navbar() {
           <span className="font-display text-2xl tracking-wide">CleanStreet</span>
         </Link>
         <div className="flex items-center gap-2 text-sm">
-          <NavLink to="/dashboard" className={({isActive}) => `px-4 py-2 rounded-full border ${isActive ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}>🏠 Dashboard</NavLink>
-          <NavLink to="/report" className={({isActive}) => `px-4 py-2 rounded-full border ${isActive ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}>📝 Report Issue</NavLink>
+          {user?.role !== 'admin' && (
+            <NavLink to="/dashboard" className={({isActive}) => `px-4 py-2 rounded-full border ${isActive ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}>🏠 Dashboard</NavLink>
+          )}
+          {user?.role === 'admin' && (
+            <NavLink to="/admin" className={({isActive}) => `px-4 py-2 rounded-full border ${isActive ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}>🛡️ Admin</NavLink>
+          )}
+          {user?.role !== 'admin' && (
+            <NavLink to="/report" className={({isActive}) => `px-4 py-2 rounded-full border ${isActive ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}>📝 Report Issue</NavLink>
+          )}
           <NavLink to="/complaints" className={({isActive}) => `px-4 py-2 rounded-full border ${isActive ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}>📋 View Complaints</NavLink>
           {user ? (
             <>

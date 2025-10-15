@@ -9,6 +9,8 @@ import Home from './pages/Home'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
+import AdminDashboard from './pages/AdminDashboard'
+import { useAuth } from './context/AuthContext'
 
 export default function App() {
   return (
@@ -21,7 +23,8 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><RoleAwareDashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/complaints" element={<ProtectedRoute><Complaints /></ProtectedRoute>} />
             <Route path="/report" element={<ProtectedRoute><ReportIssue /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -32,4 +35,12 @@ export default function App() {
       </div>
     </AuthProvider>
   )
+}
+
+function RoleAwareDashboard() {
+  const { user } = useAuth()
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />
+  }
+  return <Dashboard />
 }

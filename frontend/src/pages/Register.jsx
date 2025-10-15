@@ -9,8 +9,11 @@ export default function Register() {
   const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [role, setRole] = useState("user"); // 'user' or 'volunteer'
+  const [adminCode, setAdminCode] = useState("");
   const [error, setError] = useState("");
 
   const onSubmit = async (e) => {
@@ -21,7 +24,13 @@ export default function Register() {
       return;
     }
     try {
-      await register({ name, email, password });
+      if (role === 'admin' && !adminCode.trim()) {
+        setError('Admin access code is required');
+        return;
+      }
+      const payload = { name, email, phone, password, role };
+      if (role === 'admin') payload.admin_code = adminCode.trim();
+      await register(payload);
       navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.message);
@@ -65,8 +74,22 @@ export default function Register() {
               </div>
               <div>
                 <label className="block mb-1 text-sm">Phone Number</label>
-                <input className="input" type="tel" placeholder="0000000000" />
+                <input className="input" type="tel" placeholder="0000000000" value={phone} onChange={e=>setPhone(e.target.value)} />
               </div>
+              <div>
+                <label className="block mb-1 text-sm">Role</label>
+                <select className="input" value={role} onChange={e=>setRole(e.target.value)}>
+                  <option value="user">User</option>
+                  <option value="volunteer">Volunteer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              {role === 'admin' && (
+                <div>
+                  <label className="block mb-1 text-sm">Admin Access Code</label>
+                  <input className="input" type="password" placeholder="Enter admin code" value={adminCode} onChange={e=>setAdminCode(e.target.value)} />
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block mb-1 text-sm">Password</label>

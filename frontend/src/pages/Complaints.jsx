@@ -15,7 +15,7 @@ export default function Complaints() {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
-  const [commentText, setCommentText] = useState('');
+  const [commentText, setCommentText] = useState("");
   const [commentBusy, setCommentBusy] = useState(false);
 
   useEffect(() => {
@@ -29,7 +29,6 @@ export default function Complaints() {
     return () => (mounted = false);
   }, [token]);
 
-
   useEffect(() => {
     setPhotoIndex(0);
   }, [selected?._id]);
@@ -37,7 +36,7 @@ export default function Complaints() {
   const remove = async (id) => {
     try {
       setBusy(true);
-      await api(`/complaints/${id}`, { method: 'DELETE', token });
+      await api(`/complaints/${id}`, { method: "DELETE", token });
       setItems((prev) => prev.filter((x) => x._id !== id));
       setSelected(null);
     } catch (e) {
@@ -48,7 +47,8 @@ export default function Complaints() {
   };
 
   const canDelete = (c) => user && c && String(c.user_id) === String(user.id);
-  const canUpdateStatus = () => user && (user.role === 'admin' || user.role === 'volunteer');
+  const canUpdateStatus = () =>
+    user && (user.role === "admin" || user.role === "volunteer");
 
   const updateStatus = async (c, nextStatus) => {
     if (!c || !nextStatus) return;
@@ -56,8 +56,14 @@ export default function Complaints() {
       setStatusBusy(c._id);
       const body = { status: nextStatus };
       if (user && user.name) body.assigned_to = user.name;
-      const updated = await api(`/complaints/${c._id}/status`, { method: 'PATCH', token, body });
-      setItems((prev) => prev.map((x) => (x._id === updated._id ? updated : x)));
+      const updated = await api(`/complaints/${c._id}/status`, {
+        method: "PATCH",
+        token,
+        body,
+      });
+      setItems((prev) =>
+        prev.map((x) => (x._id === updated._id ? updated : x))
+      );
       if (selected && selected._id === c._id) setSelected(updated);
     } catch (e) {
       alert(e.message);
@@ -76,9 +82,16 @@ export default function Complaints() {
             try {
               const [v, comments] = await Promise.all([
                 api(`/votes/${c._id}/summary`, { token }),
-                api(`/comments/${c._id}`, { token })
+                api(`/comments/${c._id}`, { token }),
               ]);
-              return [c._id, { up: v.up || 0, down: v.down || 0, comments: Array.isArray(comments) ? comments.length : 0 }];
+              return [
+                c._id,
+                {
+                  up: v.up || 0,
+                  down: v.down || 0,
+                  comments: Array.isArray(comments) ? comments.length : 0,
+                },
+              ];
             } catch (_) {
               return [c._id, { up: 0, down: 0, comments: 0 }];
             }
@@ -93,7 +106,9 @@ export default function Complaints() {
       }
     };
     if (items.length) loadExtras();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [items, token]);
 
   const toggleVote = async (c, type) => {
@@ -101,17 +116,21 @@ export default function Complaints() {
     try {
       const current = myVotes[c._id] || null;
       const nextType = current === type ? null : type; // toggle off if same
-      await api(`/votes/${c._id}`, { method: 'POST', token, body: { vote_type: nextType } });
-      setMyVotes(prev => ({ ...prev, [c._id]: nextType }));
-      setSummaries(prev => {
+      await api(`/votes/${c._id}`, {
+        method: "POST",
+        token,
+        body: { vote_type: nextType },
+      });
+      setMyVotes((prev) => ({ ...prev, [c._id]: nextType }));
+      setSummaries((prev) => {
         const s = prev[c._id] || { up: 0, down: 0, comments: 0 };
         let { up, down } = s;
         // remove previous
-        if (current === 'up') up = Math.max(0, up - 1);
-        if (current === 'down') down = Math.max(0, down - 1);
+        if (current === "up") up = Math.max(0, up - 1);
+        if (current === "down") down = Math.max(0, down - 1);
         // add new
-        if (nextType === 'up') up += 1;
-        if (nextType === 'down') down += 1;
+        if (nextType === "up") up += 1;
+        if (nextType === "down") down += 1;
         return { ...prev, [c._id]: { ...s, up, down } };
       });
     } catch (e) {
@@ -123,7 +142,7 @@ export default function Complaints() {
     setSelected(c);
     setShowComments(true);
     setComments([]);
-    setCommentText('');
+    setCommentText("");
     setCommentsLoading(true);
     try {
       const list = await api(`/comments/${c._id}`, { token });
@@ -136,17 +155,24 @@ export default function Complaints() {
   };
 
   const submitComment = async () => {
-    const content = (commentText || '').trim();
+    const content = (commentText || "").trim();
     if (!selected || !content) return;
     try {
       setCommentBusy(true);
-      const created = await api(`/comments/${selected._id}`, { method: 'POST', token, body: { content } });
+      const created = await api(`/comments/${selected._id}`, {
+        method: "POST",
+        token,
+        body: { content },
+      });
       setComments((prev) => [...prev, created]);
-      setCommentText('');
+      setCommentText("");
       // bump count in summaries
       setSummaries((prev) => {
         const s = prev[selected._id] || { up: 0, down: 0, comments: 0 };
-        return { ...prev, [selected._id]: { ...s, comments: (s.comments || 0) + 1 } };
+        return {
+          ...prev,
+          [selected._id]: { ...s, comments: (s.comments || 0) + 1 },
+        };
       });
     } catch (e) {
       alert(e.message);
@@ -155,16 +181,23 @@ export default function Complaints() {
     }
   };
 
-  const canDeleteComment = (com) => user && (String(com.user_id) === String(user.id) || user.role === 'admin');
+  const canDeleteComment = (com) =>
+    user && (String(com.user_id) === String(user.id) || user.role === "admin");
   const removeComment = async (com) => {
     if (!com || !com._id) return;
     try {
       setCommentBusy(true);
-      await api(`/comments/${com._id}`, { method: 'DELETE', token });
-      setComments(prev => prev.filter(x => x._id !== com._id));
+      await api(`/comments/${com._id}`, { method: "DELETE", token });
+      setComments((prev) => prev.filter((x) => x._id !== com._id));
       setSummaries((prev) => {
         const s = prev[selected._id] || { up: 0, down: 0, comments: 0 };
-        return { ...prev, [selected._id]: { ...s, comments: Math.max(0, (s.comments || 0) - 1) } };
+        return {
+          ...prev,
+          [selected._id]: {
+            ...s,
+            comments: Math.max(0, (s.comments || 0) - 1),
+          },
+        };
       });
     } catch (e) {
       alert(e.message);
@@ -173,17 +206,17 @@ export default function Complaints() {
     }
   };
 
-  const cardIcon = (title = '') => {
+  const cardIcon = (title = "") => {
     const t = title.toLowerCase();
-    if (t.includes('pothole')) return '•';
-    if (t.includes('streetlight') || t.includes('light')) return '💡';
-    if (t.includes('garbage') || t.includes('trash')) return '🗑️';
-    if (t.includes('water') || t.includes('leak')) return '💧';
-    return '•';
+    if (t.includes("pothole")) return "•";
+    if (t.includes("streetlight") || t.includes("light")) return "💡";
+    if (t.includes("garbage") || t.includes("trash")) return "🗑️";
+    if (t.includes("water") || t.includes("leak")) return "💧";
+    return "•";
   };
 
   const timeAgo = (iso) => {
-    if (!iso) return '';
+    if (!iso) return "";
     const then = new Date(iso).getTime();
     const now = Date.now();
     const diff = Math.max(0, now - then);
@@ -205,11 +238,18 @@ export default function Complaints() {
           {items.map((c) => {
             const s = summaries[c._id] || { up: 0, down: 0, comments: 0 };
             return (
-              <div key={c._id} className="rounded-xl border border-gray-200 p-4 bg-white">
+              <div
+                key={c._id}
+                className="rounded-xl border border-gray-200 p-4 bg-white"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xl leading-none">{cardIcon(c.title)}</span>
-                    <h3 className="font-semibold text-gray-900 leading-snug line-clamp-2">{c.title}</h3>
+                    <span className="text-xl leading-none">
+                      {cardIcon(c.title)}
+                    </span>
+                    <h3 className="font-semibold text-gray-900 leading-snug line-clamp-2">
+                      {c.title}
+                    </h3>
                   </div>
                   <div className="flex items-center gap-2">
                     {canUpdateStatus() ? (
@@ -225,20 +265,29 @@ export default function Complaints() {
                         <option value="resolved">Resolved</option>
                       </select>
                     ) : (
-                      <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-700">{prettyStatus(c.status)}</span>
+                      <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-700">
+                        {prettyStatus(c.status)}
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {c.description && (
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">{c.description}</p>
+                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                    {c.description}
+                  </p>
                 )}
 
                 <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
                   {c.address && (
                     <div className="flex items-center gap-1">
                       <span>📍</span>
-                      <span className="truncate max-w-[260px]" title={c.address}>{c.address}</span>
+                      <span
+                        className="truncate max-w-[260px]"
+                        title={c.address}
+                      >
+                        {c.address}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">
@@ -250,15 +299,23 @@ export default function Complaints() {
                 <div className="mt-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <button
-                      className={`px-2 py-1 rounded border text-sm flex items-center gap-1 ${myVotes[c._id] === 'up' ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}
-                      onClick={() => toggleVote(c, 'up')}
+                      className={`px-2 py-1 rounded border text-sm flex items-center gap-1 ${
+                        myVotes[c._id] === "up"
+                          ? "bg-gray-900 text-white border-gray-900"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                      onClick={() => toggleVote(c, "up")}
                     >
                       <span>👍</span>
                       <span>{s.up}</span>
                     </button>
                     <button
-                      className={`px-2 py-1 rounded border text-sm flex items-center gap-1 ${myVotes[c._id] === 'down' ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200 hover:bg-gray-50'}`}
-                      onClick={() => toggleVote(c, 'down')}
+                      className={`px-2 py-1 rounded border text-sm flex items-center gap-1 ${
+                        myVotes[c._id] === "down"
+                          ? "bg-gray-900 text-white border-gray-900"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                      onClick={() => toggleVote(c, "down")}
                     >
                       <span>👎</span>
                       <span>{s.down}</span>
@@ -272,9 +329,25 @@ export default function Complaints() {
                     </button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="btn btn-ghost btn-sm" onClick={() => { setShowComments(false); setSelected(c); }}>View Details</button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => {
+                        setShowComments(false);
+                        setSelected(c);
+                      }}
+                    >
+                      View Details
+                    </button>
                     {canDelete(c) && (
-                      <button className="btn btn-danger btn-sm" onClick={() => { setShowComments(false); setSelected(c); }}>Delete</button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => {
+                          setShowComments(false);
+                          setSelected(c);
+                        }}
+                      >
+                        Delete
+                      </button>
                     )}
                   </div>
                 </div>
@@ -288,66 +361,147 @@ export default function Complaints() {
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => { if (!busy) { setShowComments(false); setSelected(null); } }}>
-          <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+          onClick={() => {
+            if (!busy) {
+              setShowComments(false);
+              setSelected(null);
+            }
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-lg max-w-2xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="font-semibold">{selected.title}</h3>
-              <button className="btn btn-ghost btn-sm" onClick={() => { if (!busy) { setShowComments(false); setSelected(null); } }}>✕</button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  if (!busy) {
+                    setShowComments(false);
+                    setSelected(null);
+                  }
+                }}
+              >
+                ✕
+              </button>
             </div>
             <div className="p-4 space-y-3 max-h-[70vh] overflow-auto">
-              {!showComments && selected.photos && selected.photos.length > 0 && (
-                <div className="relative w-full">
-                  <img
-                    src={selected.photos[photoIndex]}
-                    alt={`photo-${photoIndex+1}`}
-                    className="w-full max-h-64 object-contain rounded"
-                  />
-                  {selected.photos.length > 1 && (
-                    <>
-                      <button
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center"
-                        onClick={() => setPhotoIndex((i) => (i - 1 + selected.photos.length) % selected.photos.length)}
-                        aria-label="Previous photo"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center"
-                        onClick={() => setPhotoIndex((i) => (i + 1) % selected.photos.length)}
-                        aria-label="Next photo"
-                      >
-                        ›
-                      </button>
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs rounded px-2 py-0.5">
-                        {photoIndex + 1} / {selected.photos.length}
-                      </div>
-                    </>
+              {!showComments &&
+                selected.photos &&
+                selected.photos.length > 0 && (
+                  <div className="relative w-full">
+                    <img
+                      src={selected.photos[photoIndex]}
+                      alt={`photo-${photoIndex + 1}`}
+                      className="w-full max-h-64 object-contain rounded"
+                    />
+                    {selected.photos.length > 1 && (
+                      <>
+                        <button
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center"
+                          onClick={() =>
+                            setPhotoIndex(
+                              (i) =>
+                                (i - 1 + selected.photos.length) %
+                                selected.photos.length
+                            )
+                          }
+                          aria-label="Previous photo"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center"
+                          onClick={() =>
+                            setPhotoIndex(
+                              (i) => (i + 1) % selected.photos.length
+                            )
+                          }
+                          aria-label="Next photo"
+                        >
+                          ›
+                        </button>
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs rounded px-2 py-0.5">
+                          {photoIndex + 1} / {selected.photos.length}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              {!showComments && (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full font-semibold ${
+                        selected.status === "in_review"
+                          ? "bg-blue-100 text-blue-700"
+                          : selected.status === "resolved"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-blue-50 text-blue-600"
+                      }`}
+                    >
+                      {prettyStatus(selected.status)}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-xl text-gray-900 mb-1">
+                    {selected.title}
+                  </h3>
+                  {selected.description && (
+                    <div className="text-sm text-gray-700 mb-2 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                      {selected.description}
+                    </div>
                   )}
-                </div>
-              )}
-              {!showComments && selected.address && (
-                <div className="text-sm text-gray-700"><span className="font-medium">Address:</span> {selected.address}</div>
-              )}
-              {!showComments && selected.location_coords && (
-                <div className="text-xs text-gray-500">Coords: {selected.location_coords}</div>
-              )}
-              {!showComments && selected.description && (
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{selected.description}</p>
+                  <div className="text-sm text-gray-700 mb-1">
+                    <span className="font-semibold">Reported:</span>{" "}
+                    {selected.created_at
+                      ? new Date(selected.created_at).toLocaleDateString()
+                      : "N/A"}
+                  </div>
+                  {selected.address && (
+                    <div className="flex items-center gap-1 text-sm text-gray-700 mb-1">
+                      <span>📍</span>
+                      <span
+                        className="truncate max-w-[220px]"
+                        title={selected.address}
+                      >
+                        {selected.address}
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
               {showComments && (
                 <div className="space-y-3">
                   <h4 className="font-medium">Comments</h4>
                   {commentsLoading ? (
-                    <div className="text-sm text-gray-500">Loading comments...</div>
+                    <div className="text-sm text-gray-500">
+                      Loading comments...
+                    </div>
                   ) : comments.length === 0 ? (
-                    <div className="text-sm text-gray-500">No comments yet.</div>
+                    <div className="text-sm text-gray-500">
+                      No comments yet.
+                    </div>
                   ) : (
                     <ul className="space-y-2">
                       {comments.map((cm) => (
-                        <li key={cm._id} className="border border-gray-200 rounded p-2 text-sm flex items-start justify-between gap-2">
-                          <div className="whitespace-pre-wrap break-words">{cm.content}</div>
+                        <li
+                          key={cm._id}
+                          className="border border-gray-200 rounded p-2 text-sm flex items-start justify-between gap-2"
+                        >
+                          <div className="whitespace-pre-wrap break-words">
+                            {cm.content}
+                          </div>
                           {canDeleteComment(cm) && (
-                            <button className="text-xs text-red-600 hover:underline" onClick={() => removeComment(cm)} disabled={commentBusy}>Delete</button>
+                            <button
+                              className="text-xs text-red-600 hover:underline"
+                              onClick={() => removeComment(cm)}
+                              disabled={commentBusy}
+                            >
+                              Delete
+                            </button>
                           )}
                         </li>
                       ))}
@@ -359,20 +513,37 @@ export default function Complaints() {
                       placeholder="Write a comment..."
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') submitComment(); }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") submitComment();
+                      }}
                     />
-                    <button className="btn" onClick={submitComment} disabled={commentBusy || !commentText.trim()}>{commentBusy ? 'Sending...' : 'Send'}</button>
+                    <button
+                      className="btn"
+                      onClick={submitComment}
+                      disabled={commentBusy || !commentText.trim()}
+                    >
+                      {commentBusy ? "Sending..." : "Send"}
+                    </button>
                   </div>
                 </div>
               )}
             </div>
             <div className="p-4 border-t flex items-center justify-end gap-2">
               {canDelete(selected) && (
-                <button className="btn btn-danger" disabled={busy} onClick={() => remove(selected._id)}>
-                  {busy ? 'Deleting...' : 'Delete Complaint'}
+                <button
+                  className="btn btn-danger"
+                  disabled={busy}
+                  onClick={() => remove(selected._id)}
+                >
+                  {busy ? "Deleting..." : "Delete Complaint"}
                 </button>
               )}
-              <button className="btn" onClick={() => !busy && setSelected(null)}>Close</button>
+              <button
+                className="btn"
+                onClick={() => !busy && setSelected(null)}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
@@ -382,6 +553,6 @@ export default function Complaints() {
 }
 
 function prettyStatus(s) {
-  if (s === 'in_review') return 'In Review'
-  return s ? s[0].toUpperCase() + s.slice(1).replace('_', ' ') : ''
+  if (s === "in_review") return "In Review";
+  return s ? s[0].toUpperCase() + s.slice(1).replace("_", " ") : "";
 }

@@ -37,32 +37,32 @@ export default function Register() {
     }
   };
   return (
-  <section className="grid lg:grid-cols-2 items-start gap-0 max-w-[1200px] mx-auto py-8 lg:py-12">
+  <section className="grid lg:grid-cols-2 items-stretch gap-0 max-w-[1200px] mx-auto py-4 lg:py-6">
       {/* Illustration left */}
-      <div className="hidden lg:flex items-start justify-end lg:px-0 pt-0 lg:-mr-px">
+  <div className="hidden lg:flex items-center justify-end lg:px-0 pt-0 lg:-mr-px lg:h-[600px]">
         <img
           src={registerImg}
           alt="Register illustration"
-          className="w-full max-w-md h-auto object-contain"
+          className="w-full max-w-md h-full object-contain"
         />
       </div>
 
       {/* Form right */}
-      <div className="flex items-center justify-center lg:justify-start pt-0 pb-16 px-6 lg:px-0">
-        <div className="w-full max-w-md relative p-6 rounded-xl shadow-soft bg-white/85 backdrop-blur-sm overflow-hidden">
+  <div className="flex items-center justify-center lg:justify-start pt-0 pb-0 px-6 lg:px-0 lg:h-[600px]">
+  <div className="w-full max-w-md h-full relative p-5 rounded-xl shadow-soft bg-white/85 backdrop-blur-sm overflow-y-auto flex flex-col">
           {/* subtle earth background */}
           <img
             src={regEarth}
             alt="Earth"
             className="pointer-events-none select-none absolute right-0 bottom-0 w-[100%] opacity-50 z-0"
           />
-          <div className="relative z-10">
-            <div className="mb-2 text-center">
+          <div className="relative z-10 flex-1 flex flex-col">
+            <div className="mb-1 text-center">
               <h2 className="font-display text-2xl">Join Clean Street</h2>
               <p className="text-gray-600">Be the Change!</p>
             </div>
 
-            <form className="space-y-4" onSubmit={onSubmit}>
+            <form className="space-y-2" onSubmit={onSubmit}>
               {error && <div className="text-sm text-red-600">{error}</div>}
               <div>
                 <label className="block mb-1 text-sm">Full Name</label>
@@ -90,7 +90,7 @@ export default function Register() {
                   <input className="input" type="password" placeholder="Enter admin code" value={adminCode} onChange={e=>setAdminCode(e.target.value)} />
                 </div>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block mb-1 text-sm">Password</label>
                   <input className="input" type="password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)} />
@@ -109,7 +109,7 @@ export default function Register() {
               <button className="btn btn-brand w-full" type="submit">Register</button>
             </form>
 
-            <p className="mt-4 text-sm text-center text-gray-600">
+            <p className="mt-3 text-sm text-center text-gray-600">
               Already have an account?{" "}
               <Link
                 to="/login"

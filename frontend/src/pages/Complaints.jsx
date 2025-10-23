@@ -242,8 +242,8 @@ export default function Complaints() {
                 key={c._id}
                 className="rounded-xl border border-gray-200 p-4 bg-white"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xl leading-none">
                       {cardIcon(c.title)}
                     </span>
@@ -251,7 +251,7 @@ export default function Complaints() {
                       {c.title}
                     </h3>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto order-2 sm:order-none mt-1 sm:mt-0">
                     {canUpdateStatus() ? (
                       <select
                         className="px-2 py-1 text-xs rounded-full border border-gray-200 bg-blue-50 text-blue-700"
@@ -278,12 +278,12 @@ export default function Complaints() {
                   </p>
                 )}
 
-                <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
                   {c.address && (
                     <div className="flex items-center gap-1">
                       <span>📍</span>
                       <span
-                        className="truncate max-w-[260px]"
+                        className="truncate max-w-[60vw] sm:max-w-[260px]"
                         title={c.address}
                       >
                         {c.address}
@@ -296,10 +296,10 @@ export default function Complaints() {
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="mt-4 flex flex-wrap items-center gap-2 justify-between">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <button
-                      className={`px-2 py-1 rounded border text-sm flex items-center gap-1 ${
+                      className={`px-2 py-1 rounded border text-xs sm:text-sm flex items-center gap-1 ${
                         myVotes[c._id] === "up"
                           ? "bg-gray-900 text-white border-gray-900"
                           : "border-gray-200 hover:bg-gray-50"
@@ -310,7 +310,7 @@ export default function Complaints() {
                       <span>{s.up}</span>
                     </button>
                     <button
-                      className={`px-2 py-1 rounded border text-sm flex items-center gap-1 ${
+                      className={`px-2 py-1 rounded border text-xs sm:text-sm flex items-center gap-1 ${
                         myVotes[c._id] === "down"
                           ? "bg-gray-900 text-white border-gray-900"
                           : "border-gray-200 hover:bg-gray-50"
@@ -321,14 +321,14 @@ export default function Complaints() {
                       <span>{s.down}</span>
                     </button>
                     <button
-                      className="px-2 py-1 rounded border border-gray-200 text-sm flex items-center gap-1 hover:bg-gray-50"
+                      className="px-2 py-1 rounded border border-gray-200 text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50"
                       onClick={() => openComments(c)}
                     >
                       <span>💬</span>
                       <span>Comments ({s.comments})</span>
                     </button>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                     <button
                       className="btn btn-ghost btn-sm"
                       onClick={() => {

@@ -10,9 +10,8 @@ export default function Complaints() {
   const [busy, setBusy] = useState(false);
   const [statusBusy, setStatusBusy] = useState(null);
   const [photoIndex, setPhotoIndex] = useState(0);
-  const [summaries, setSummaries] = useState({}); // { [id]: { up, down, comments } }
-  const [myVotes, setMyVotes] = useState({}); // { [id]: 'up'|'down'|null }
-  const [showComments, setShowComments] = useState(false);
+  const [summaries, setSummaries] = useState({});
+  const [myVotes, setMyVotes] = useState({});
   const [comments, setComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -21,17 +20,12 @@ export default function Complaints() {
   useEffect(() => {
     let mounted = true;
     api("/complaints", { token })
-      .then((data) => {
-        if (!mounted) return;
-        setItems(data);
-      })
+      .then((data) => mounted && setItems(data))
       .finally(() => mounted && setLoading(false));
     return () => (mounted = false);
   }, [token]);
 
-  useEffect(() => {
-    setPhotoIndex(0);
-  }, [selected?._id]);
+  useEffect(() => setPhotoIndex(0), [selected?._id]);
 
   const remove = async (id) => {
     try {
@@ -72,7 +66,6 @@ export default function Complaints() {
     }
   };
 
-  // Fetch vote summaries and comment counts for visible complaints
   useEffect(() => {
     let mounted = true;
     const loadExtras = async () => {
@@ -92,7 +85,7 @@ export default function Complaints() {
                   comments: Array.isArray(comments) ? comments.length : 0,
                 },
               ];
-            } catch (_) {
+            } catch {
               return [c._id, { up: 0, down: 0, comments: 0 }];
             }
           })
@@ -101,21 +94,17 @@ export default function Complaints() {
         const next = {};
         for (const [id, v] of entries) next[id] = v;
         setSummaries(next);
-      } catch {
-        // ignore extras errors
-      }
+      } catch {}
     };
     if (items.length) loadExtras();
-    return () => {
-      mounted = false;
-    };
+    return () => (mounted = false);
   }, [items, token]);
 
   const toggleVote = async (c, type) => {
     if (!c) return;
     try {
       const current = myVotes[c._id] || null;
-      const nextType = current === type ? null : type; // toggle off if same
+      const nextType = current === type ? null : type;
       await api(`/votes/${c._id}`, {
         method: "POST",
         token,
@@ -125,10 +114,8 @@ export default function Complaints() {
       setSummaries((prev) => {
         const s = prev[c._id] || { up: 0, down: 0, comments: 0 };
         let { up, down } = s;
-        // remove previous
         if (current === "up") up = Math.max(0, up - 1);
         if (current === "down") down = Math.max(0, down - 1);
-        // add new
         if (nextType === "up") up += 1;
         if (nextType === "down") down += 1;
         return { ...prev, [c._id]: { ...s, up, down } };
@@ -138,17 +125,13 @@ export default function Complaints() {
     }
   };
 
-  const openComments = async (c) => {
-    setSelected(c);
-    setShowComments(true);
+  const loadComments = async (c) => {
     setComments([]);
-    setCommentText("");
     setCommentsLoading(true);
     try {
       const list = await api(`/comments/${c._id}`, { token });
       setComments(Array.isArray(list) ? list : []);
-    } catch (e) {
-      // ignore, show empty state
+    } catch {
     } finally {
       setCommentsLoading(false);
     }
@@ -166,7 +149,6 @@ export default function Complaints() {
       });
       setComments((prev) => [...prev, created]);
       setCommentText("");
-      // bump count in summaries
       setSummaries((prev) => {
         const s = prev[selected._id] || { up: 0, down: 0, comments: 0 };
         return {
@@ -183,6 +165,7 @@ export default function Complaints() {
 
   const canDeleteComment = (com) =>
     user && (String(com.user_id) === String(user.id) || user.role === "admin");
+
   const removeComment = async (com) => {
     if (!com || !com._id) return;
     try {
@@ -206,341 +189,235 @@ export default function Complaints() {
     }
   };
 
-  const cardIcon = (title = "") => {
-    const t = title.toLowerCase();
-    if (t.includes("pothole")) return "•";
-    if (t.includes("streetlight") || t.includes("light")) return "💡";
-    if (t.includes("garbage") || t.includes("trash")) return "🗑️";
-    if (t.includes("water") || t.includes("leak")) return "💧";
-    return "•";
-  };
-
   const timeAgo = (iso) => {
     if (!iso) return "";
     const then = new Date(iso).getTime();
-    const now = Date.now();
-    const diff = Math.max(0, now - then);
+    const diff = Date.now() - then;
     const mins = Math.floor(diff / 60000);
     if (mins < 60) return `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    return `${days}d ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
+
+  const progressFromStatus = (status) => {
+    if (status === "received") return 25;
+    if (status === "in_review") return 60;
+    if (status === "resolved") return 100;
+    return 0;
   };
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-display mb-4">All Complaints</h1>
+    <section className="max-w-6xl mx-auto px-3 py-5">
+      <h1 className="text-xl font-semibold mb-4">All Complaints</h1>
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {items.map((c) => {
             const s = summaries[c._id] || { up: 0, down: 0, comments: 0 };
+            const progress = progressFromStatus(c.status);
             return (
               <div
                 key={c._id}
-                className="rounded-xl border border-gray-200 p-4 bg-white"
+                className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
               >
-                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xl leading-none">
-                      {cardIcon(c.title)}
-                    </span>
-                    <h3 className="font-semibold text-gray-900 leading-snug line-clamp-2">
-                      {c.title}
-                    </h3>
+                {c.photos && c.photos.length > 0 ? (
+                  <img
+                    src={c.photos[0]}
+                    alt={c.title}
+                    className="w-full h-28 object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-28 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                    No Image
                   </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto order-2 sm:order-none mt-1 sm:mt-0">
+                )}
+                <div className="p-3">
+                  <div className="flex justify-between items-center">
                     {canUpdateStatus() ? (
                       <select
-                        className="px-2 py-1 text-xs rounded-full border border-gray-200 bg-blue-50 text-blue-700"
+                        className="text-xs px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700"
                         value={c.status}
                         disabled={statusBusy === c._id}
                         onChange={(e) => updateStatus(c, e.target.value)}
-                        title="Change status"
                       >
                         <option value="received">Received</option>
                         <option value="in_review">In Review</option>
                         <option value="resolved">Resolved</option>
                       </select>
                     ) : (
-                      <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-700">
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
                         {prettyStatus(c.status)}
                       </span>
                     )}
+                    <span className="text-xs text-gray-500">
+                      {timeAgo(c.created_at)}
+                    </span>
                   </div>
-                </div>
-
-                {c.description && (
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                  <h3 className="font-medium text-gray-900 mt-2 text-sm">
+                    {c.title}
+                  </h3>
+                  <p className="text-xs text-gray-600 line-clamp-2">
                     {c.description}
                   </p>
-                )}
-
-                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
                   {c.address && (
-                    <div className="flex items-center gap-1">
-                      <span>📍</span>
-                      <span
-                        className="truncate max-w-[60vw] sm:max-w-[260px]"
-                        title={c.address}
-                      >
-                        {c.address}
-                      </span>
-                    </div>
+                    <p className="text-xs text-gray-500 mt-1">📍 {c.address}</p>
                   )}
-                  <div className="flex items-center gap-1">
-                    <span>🕒</span>
-                    <span>{timeAgo(c.created_at)}</span>
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-yellow-500 h-2 rounded-full"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Progress: {progress}%
+                    </p>
                   </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2 justify-between">
-                  <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <button
+                        className={`px-2 py-0.5 text-xs rounded border flex items-center gap-1 ${
+                          myVotes[c._id] === "up"
+                            ? "bg-gray-900 text-white border-gray-900"
+                            : "border-gray-200"
+                        }`}
+                        onClick={() => toggleVote(c, "up")}
+                      >
+                        👍 {s.up}
+                      </button>
+                      <button
+                        className={`px-2 py-0.5 text-xs rounded border flex items-center gap-1 ${
+                          myVotes[c._id] === "down"
+                            ? "bg-gray-900 text-white border-gray-900"
+                            : "border-gray-200"
+                        }`}
+                        onClick={() => toggleVote(c, "down")}
+                      >
+                        👎 {s.down}
+                      </button>
+                      <button className="px-2 py-0.5 text-xs rounded border border-gray-200">
+                        💬 {s.comments}
+                      </button>
+                    </div>
                     <button
-                      className={`px-2 py-1 rounded border text-xs sm:text-sm flex items-center gap-1 ${
-                        myVotes[c._id] === "up"
-                          ? "bg-gray-900 text-white border-gray-900"
-                          : "border-gray-200 hover:bg-gray-50"
-                      }`}
-                      onClick={() => toggleVote(c, "up")}
-                    >
-                      <span>👍</span>
-                      <span>{s.up}</span>
-                    </button>
-                    <button
-                      className={`px-2 py-1 rounded border text-xs sm:text-sm flex items-center gap-1 ${
-                        myVotes[c._id] === "down"
-                          ? "bg-gray-900 text-white border-gray-900"
-                          : "border-gray-200 hover:bg-gray-50"
-                      }`}
-                      onClick={() => toggleVote(c, "down")}
-                    >
-                      <span>👎</span>
-                      <span>{s.down}</span>
-                    </button>
-                    <button
-                      className="px-2 py-1 rounded border border-gray-200 text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50"
-                      onClick={() => openComments(c)}
-                    >
-                      <span>💬</span>
-                      <span>Comments ({s.comments})</span>
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                    <button
-                      className="btn btn-ghost btn-sm"
+                      className="text-blue-600 text-xs font-medium hover:underline"
                       onClick={() => {
-                        setShowComments(false);
                         setSelected(c);
+                        loadComments(c);
                       }}
                     >
-                      View Details
+                      View
                     </button>
-                    {canDelete(c) && (
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => {
-                          setShowComments(false);
-                          setSelected(c);
-                        }}
-                      >
-                        Delete
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
             );
           })}
-          {items.length === 0 && (
-            <div className="text-gray-500">No complaints yet.</div>
-          )}
         </div>
       )}
-
+      {/* View Modal with Comments */}
       {selected && (
         <div
-          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => {
-            if (!busy) {
-              setShowComments(false);
-              setSelected(null);
-            }
-          }}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => !busy && setSelected(null)}
         >
           <div
-            className="bg-white rounded-xl shadow-lg max-w-2xl w-full"
             onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-xl shadow-lg w-full max-w-md max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="font-semibold">{selected.title}</h3>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => {
-                  if (!busy) {
-                    setShowComments(false);
-                    setSelected(null);
-                  }
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-4 space-y-3 max-h-[70vh] overflow-auto">
-              {!showComments &&
-                selected.photos &&
-                selected.photos.length > 0 && (
-                  <div className="relative w-full">
-                    <img
-                      src={selected.photos[photoIndex]}
-                      alt={`photo-${photoIndex + 1}`}
-                      className="w-full max-h-64 object-contain rounded"
-                    />
-                    {selected.photos.length > 1 && (
-                      <>
-                        <button
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center"
-                          onClick={() =>
-                            setPhotoIndex(
-                              (i) =>
-                                (i - 1 + selected.photos.length) %
-                                selected.photos.length
-                            )
-                          }
-                          aria-label="Previous photo"
-                        >
-                          ‹
-                        </button>
-                        <button
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center"
-                          onClick={() =>
-                            setPhotoIndex(
-                              (i) => (i + 1) % selected.photos.length
-                            )
-                          }
-                          aria-label="Next photo"
-                        >
-                          ›
-                        </button>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs rounded px-2 py-0.5">
-                          {photoIndex + 1} / {selected.photos.length}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-              {!showComments && (
-                <>
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full font-semibold ${
-                        selected.status === "in_review"
-                          ? "bg-blue-100 text-blue-700"
-                          : selected.status === "resolved"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-blue-50 text-blue-600"
-                      }`}
-                    >
-                      {prettyStatus(selected.status)}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-xl text-gray-900 mb-1">
-                    {selected.title}
-                  </h3>
-                  {selected.description && (
-                    <div className="text-sm text-gray-700 mb-2 whitespace-pre-wrap max-h-40 overflow-y-auto">
-                      {selected.description}
-                    </div>
-                  )}
-                  <div className="text-sm text-gray-700 mb-1">
-                    <span className="font-semibold">Reported:</span>{" "}
-                    {selected.created_at
-                      ? new Date(selected.created_at).toLocaleDateString()
-                      : "N/A"}
-                  </div>
-                  {selected.address && (
-                    <div className="flex items-center gap-1 text-sm text-gray-700 mb-1">
-                      <span>📍</span>
-                      <span
-                        className="truncate max-w-[220px]"
-                        title={selected.address}
-                      >
-                        {selected.address}
-                      </span>
-                    </div>
-                  )}
-                </>
+            {selected.photos && selected.photos.length > 0 && (
+              <img
+                src={selected.photos[photoIndex]}
+                alt="complaint"
+                className="w-full h-44 object-contain"
+              />
+            )}
+            <div className="p-4 flex-1 overflow-y-auto space-y-3">
+              <h2 className="text-lg font-semibold">{selected.title}</h2>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {selected.description}
+              </p>
+              {selected.address && (
+                <p className="text-xs text-gray-500">📍 {selected.address}</p>
               )}
-              {showComments && (
-                <div className="space-y-3">
-                  <h4 className="font-medium">Comments</h4>
-                  {commentsLoading ? (
-                    <div className="text-sm text-gray-500">
-                      Loading comments...
-                    </div>
-                  ) : comments.length === 0 ? (
-                    <div className="text-sm text-gray-500">
-                      No comments yet.
-                    </div>
-                  ) : (
-                    <ul className="space-y-2">
-                      {comments.map((cm) => (
-                        <li
-                          key={cm._id}
-                          className="border border-gray-200 rounded p-2 text-sm flex items-start justify-between gap-2"
-                        >
-                          <div className="whitespace-pre-wrap break-words">
-                            {cm.content}
-                          </div>
-                          {canDeleteComment(cm) && (
+              <div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-yellow-500 h-2 rounded-full"
+                    style={{
+                      width: `${progressFromStatus(selected.status)}%`,
+                    }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Progress: {progressFromStatus(selected.status)}%
+                </p>
+              </div>
+
+              {/* Comments Section */}
+              <div className="mt-3 border-t pt-3">
+                <h3 className="text-sm font-semibold mb-2">Comments</h3>
+                {commentsLoading ? (
+                  <p className="text-xs text-gray-500">Loading comments...</p>
+                ) : comments.length === 0 ? (
+                  <p className="text-xs text-gray-500">No comments yet.</p>
+                ) : (
+                  <ul className="space-y-2 max-h-40 overflow-y-auto">
+                    {comments.map((com) => (
+                      <li key={com._id} className="border-b pb-1">
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs text-gray-700">{com.content}</p>
+                          {canDeleteComment(com) && (
                             <button
-                              className="text-xs text-red-600 hover:underline"
-                              onClick={() => removeComment(cm)}
+                              onClick={() => removeComment(com)}
                               disabled={commentBusy}
+                              className="text-[10px] text-red-500 hover:underline"
                             >
                               Delete
                             </button>
                           )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <input
-                      className="flex-1 input"
-                      placeholder="Write a comment..."
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") submitComment();
-                      }}
-                    />
-                    <button
-                      className="btn"
-                      onClick={submitComment}
-                      disabled={commentBusy || !commentText.trim()}
-                    >
-                      {commentBusy ? "Sending..." : "Send"}
-                    </button>
-                  </div>
+                        </div>
+                        <p className="text-[10px] text-gray-400">
+                          {timeAgo(com.created_at)}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    type="text"
+                    className="flex-1 border rounded px-2 py-1 text-xs"
+                    placeholder="Add a comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                  />
+                  <button
+                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+                    onClick={submitComment}
+                    disabled={commentBusy}
+                  >
+                    Post
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
-            <div className="p-4 border-t flex items-center justify-end gap-2">
+
+            <div className="p-4 border-t flex justify-between">
               {canDelete(selected) && (
                 <button
-                  className="btn btn-danger"
+                  className="text-red-500 text-xs"
                   disabled={busy}
                   onClick={() => remove(selected._id)}
                 >
-                  {busy ? "Deleting..." : "Delete Complaint"}
+                  Delete
                 </button>
               )}
               <button
-                className="btn"
-                onClick={() => !busy && setSelected(null)}
+                className="px-4 py-1 text-xs bg-gray-800 text-white rounded hover:bg-gray-700"
+                onClick={() => setSelected(null)}
               >
                 Close
               </button>

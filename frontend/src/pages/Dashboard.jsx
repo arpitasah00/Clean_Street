@@ -55,7 +55,7 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8">
             {/* Activity card */}
-            <div className="rounded-2xl border border-gray-200 shadow-sm">
+            <div className="rounded-2xl border border-gray-200 shadow-sm bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
               <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="font-medium">Activity</h2>
                 <span className="text-xs text-green-600 bg-green-50 border border-green-200 rounded-md px-2 py-0.5">
@@ -92,7 +92,7 @@ export default function Dashboard() {
 
             <aside className="space-y-4">
               {/* Quick Action */}
-              <div className="rounded-2xl border border-gray-200 p-4">
+              <div className="rounded-2xl border border-gray-200 p-4 bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
                 <h3 className="font-medium mb-2">Quick Action</h3>
                 <div className="space-y-2">
                   <a href="/report" className="btn btn-primary w-full">
@@ -110,7 +110,7 @@ export default function Dashboard() {
                 </div>
               </div>
               {/* Support Team */}
-              <div className="rounded-2xl border border-gray-200 p-4">
+              <div className="rounded-2xl border border-gray-200 p-4 bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
                 <h3 className="font-medium mb-1">Support Team</h3>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                   <span className="w-6 h-6 rounded-full bg-green-50 text-green-700 flex items-center justify-center border border-green-200">
@@ -135,10 +135,10 @@ export default function Dashboard() {
 
 function StatCard({ icon, value, label }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-4 md:p-6 min-h-[120px] md:min-h-[140px]">
+    <div className="group rounded-2xl border border-gray-200 bg-white shadow-sm p-4 md:p-6 min-h-[120px] md:min-h-[140px] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
       <div className="flex flex-col items-center justify-center text-center h-full">
-        <div className="text-2xl md:text-3xl text-gray-700 mb-2">{icon}</div>
-        <div className="text-2xl md:text-3xl font-semibold leading-none">
+        <div className="text-2xl md:text-3xl text-gray-700 mb-2 transition-transform duration-200 group-hover:scale-110">{icon}</div>
+        <div className="text-2xl md:text-3xl font-semibold leading-none transition-transform duration-200 group-hover:scale-[1.03]">
           {value}
         </div>
         <div className="text-xs md:text-sm text-gray-500 mt-2">{label}</div>

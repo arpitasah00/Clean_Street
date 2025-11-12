@@ -16,3 +16,13 @@ export async function api(path, { method = 'GET', body, token } = {}) {
   }
   return res.json()
 }
+
+// Admin logs fetch
+export async function fetchAdminLogs(token) {
+  return api('/admin-logs', { token })
+}
+
+// Recent updates (logs) for all authenticated users
+export async function fetchRecentUpdates(token) {
+  return api('/admin-logs/recent', { token })
+}

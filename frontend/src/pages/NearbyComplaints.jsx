@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
 
-export default function Complaints() {
+export default function NearbyComplaints() {
   const { token, user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ export default function Complaints() {
 
   useEffect(() => {
     let mounted = true;
-    api("/complaints", { token })
+    api("/complaints/nearby", { token })
       .then((data) => mounted && setItems(data))
       .finally(() => mounted && setLoading(false));
     return () => (mounted = false);
@@ -41,8 +41,8 @@ export default function Complaints() {
   };
 
   const canDelete = (c) => user && c && String(c.user_id) === String(user.id);
-  // In the general view, only admins can change status
-  const canUpdateStatus = () => user && user.role === "admin";
+  // On Nearby page, volunteers and admins can update status
+  const canUpdateStatus = () => user && (user.role === "admin" || user.role === "volunteer");
 
   const updateStatus = async (c, nextStatus) => {
     if (!c || !nextStatus) return;
@@ -209,7 +209,7 @@ export default function Complaints() {
 
   return (
     <section className="max-w-6xl mx-auto px-3 py-5">
-      <h1 className="text-xl font-semibold mb-4">All Complaints</h1>
+      <h1 className="text-xl font-semibold mb-4">Nearby Complaints</h1>
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -317,7 +317,6 @@ export default function Complaints() {
           })}
         </div>
       )}
-      {/* View Modal with Comments */}
       {selected && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"

@@ -92,21 +92,19 @@ export default function AdminDashboard() {
           api('/complaints', { token }),
           api('/users', { token })
         ])
-        if (!canceled) {
-          setComplaints(allComplaints)
-          setUsers(allUsers)
-        }
+        if (canceled) return
+        setComplaints(allComplaints)
+        setUsers(allUsers)
       } catch (e) {
-        // Silently ignore temporary fetch errors during polling
+        console.error(e)
       }
     }
-    // initial refresh on tab enter
     refresh()
     const id = setInterval(refresh, 30000)
     return () => { canceled = true; clearInterval(id) }
   }, [tab, token])
 
-  async function loadLogs() {
+  const loadLogs = async () => {
     try {
       setLogsLoading(true)
       const data = await fetchAdminLogs(token)
@@ -593,6 +591,8 @@ function UsersSection({ users = [], token, onUserUpdated }) {
   const [savingId, setSavingId] = useState(null)
   const [local, setLocal] = useState(users)
   const [editingId, setEditingId] = useState(null)
+  const [roleFilter, setRoleFilter] = useState('all') // all | user | volunteer | admin
+  const [locationFilter, setLocationFilter] = useState('all')
 
   useEffect(() => { setLocal(users) }, [users])
 
@@ -625,6 +625,15 @@ function UsersSection({ users = [], token, onUserUpdated }) {
         <div className="font-medium">User Management</div>
         <div className="text-sm text-gray-500">Total: {local.length}</div>
       </div>
+      {/* Filters */}
+      <UsersFilters
+        users={local}
+        roleFilter={roleFilter}
+        locationFilter={locationFilter}
+        onChangeRole={setRoleFilter}
+        onChangeLocation={setLocationFilter}
+        onClear={() => { setRoleFilter('all'); setLocationFilter('all') }}
+      />
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50 text-gray-600">
@@ -638,49 +647,97 @@ function UsersSection({ users = [], token, onUserUpdated }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {local.map(u => (
-              <tr key={u._id} className="hover:bg-gray-50">
-                <td className="px-6 py-3">{u.name}</td>
-                <td className="px-6 py-3 text-gray-700">{u.email}</td>
-                <td className="px-6 py-3 text-gray-600">{u.location || '-'}</td>
-                <td className="px-6 py-3">
-                  <div className="flex items-center gap-2">
-                    <RoleBadge role={u.role} />
-                    {editingId === u._id && (
-                      <select
-                        className="border border-gray-200 rounded-md px-2 py-1 text-xs text-gray-700 bg-white hover:border-gray-300"
-                        value={u.role}
-                        onChange={(e) => changeRole(u._id, e.target.value)}
-                        disabled={savingId === u._id}
-                      >
-                        <option value="user">user</option>
-                        <option value="volunteer">volunteer</option>
-                        <option value="admin">admin</option>
-                      </select>
-                    )}
-                    {savingId === u._id && <span className="text-xs text-gray-500">Saving…</span>}
-                  </div>
-                </td>
-                <td className="px-6 py-3 text-gray-600">{formatDateTime(u.createdAt)}</td>
-                <td className="px-6 py-3">
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700"
-                    onClick={() => setEditingId(editingId === u._id ? null : u._id)}
-                    title={editingId === u._id ? 'Close' : 'Edit role'}
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                    <span className="underline text-xs">{editingId === u._id ? 'Close' : 'Edit'}</span>
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {local
+              .filter(u => roleFilter === 'all' ? true : u.role === roleFilter)
+              .filter(u => locationFilter === 'all' ? true : (u.location || '').trim().toLowerCase() === locationFilter)
+              .map(u => (
+                <tr key={u._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-3">{u.name}</td>
+                  <td className="px-6 py-3 text-gray-700">{u.email}</td>
+                  <td className="px-6 py-3 text-gray-600">{u.location || '-'}</td>
+                  <td className="px-6 py-3">
+                    <div className="flex items-center gap-2">
+                      <RoleBadge role={u.role} />
+                      {editingId === u._id && (
+                        <select
+                          className="border border-gray-200 rounded-md px-2 py-1 text-xs text-gray-700 bg-white hover:border-gray-300"
+                          value={u.role}
+                          onChange={(e) => changeRole(u._id, e.target.value)}
+                          disabled={savingId === u._id}
+                        >
+                          <option value="user">user</option>
+                          <option value="volunteer">volunteer</option>
+                          <option value="admin">admin</option>
+                        </select>
+                      )}
+                      {savingId === u._id && <span className="text-xs text-gray-500">Saving…</span>}
+                    </div>
+                  </td>
+                  <td className="px-6 py-3 text-gray-600">{formatDateTime(u.createdAt)}</td>
+                  <td className="px-6 py-3">
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                      onClick={() => setEditingId(editingId === u._id ? null : u._id)}
+                      title={editingId === u._id ? 'Close' : 'Edit role'}
+                    >
+                      <PencilIcon className="w-4 h-4" />
+                      <span className="underline text-xs">{editingId === u._id ? 'Close' : 'Edit'}</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
     </div>
   )
 }
+
+function UsersFilters({ users = [], roleFilter, locationFilter, onChangeRole, onChangeLocation, onClear }) {
+  const locations = Array.from(new Set((users || [])
+    .map(u => (u.location || '').trim())
+    .filter(Boolean)
+    .map(s => s.toLowerCase()))).sort()
+  const showingCount = (users || [])
+    .filter(u => roleFilter === 'all' ? true : u.role === roleFilter)
+    .filter(u => locationFilter === 'all' ? true : (u.location || '').trim().toLowerCase() === locationFilter)
+    .length
+
+  return (
+    <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap items-center gap-3 text-sm">
+      <div className="text-gray-600 flex items-center gap-2 mr-2">
+        <span className="inline-block">Filters:</span>
+      </div>
+      {/* Location */}
+      <select
+        className="px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        value={locationFilter}
+        onChange={(e) => onChangeLocation(e.target.value)}
+      >
+        <option value="all">All Locations</option>
+        {locations.map(loc => (
+          <option key={loc} value={loc}>{capitalize(loc)}</option>
+        ))}
+      </select>
+      {/* Role */}
+      <select
+        className="px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        value={roleFilter}
+        onChange={(e) => onChangeRole(e.target.value)}
+      >
+        <option value="all">All Roles</option>
+        <option value="user">user</option>
+        <option value="volunteer">volunteer</option>
+        <option value="admin">admin</option>
+      </select>
+      <button type="button" onClick={onClear} className="text-indigo-600 hover:underline ml-auto">Clear Filters</button>
+      <div className="text-xs text-gray-500">Showing {showingCount} of {users.length}</div>
+    </div>
+  )
+}
+
+function capitalize(s='') { return s ? s[0].toUpperCase() + s.slice(1) : s }
 
 function RecentActivitiesSection({ logs = [], loading, onRefresh }) {
   return (

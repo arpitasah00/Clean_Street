@@ -145,9 +145,9 @@ export default function Profile() {
   };
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[320px,1fr] gap-6">
+    <section className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[320px,1fr] gap-6 text-gray-900 dark:text-gray-100">
       {/* Left card: Profile summary + avatar uploader */}
-      <aside className="rounded-2xl border border-gray-200 p-6 space-y-4">
+      <aside className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 space-y-4">
         <div className="flex flex-col items-center text-center gap-3">
           <div className="relative">
             {form.profile_photo ? (
@@ -181,18 +181,18 @@ export default function Profile() {
             <div className="font-display text-xl">
               {form.name || "Your Name"}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {user?.email ? `@${user.email.split("@")[0]}` : "@username"}
             </div>
             <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
               Citizen
             </span>
           </div>
-          <p className="text-sm text-gray-600 max-w-xs">
+          <p className="text-sm text-gray-600 dark:text-gray-300 max-w-xs">
             {form.bio ||
               "Active citizen helping to improve our community through CleanStreet reporting."}
           </p>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             Member since{" "}
             {user?.createdAt
               ? new Date(user.createdAt).toLocaleDateString()
@@ -200,34 +200,36 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 p-4 space-y-3">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 space-y-3">
           <h3 className="font-display">Security Settings</h3>
           <button
-            className="btn btn-ghost w-full"
+            className="btn btn-ghost w-full text-black dark:text-black"
             onClick={() => setShowPwd((s) => !s)}
           >
             🔒 Change Password
           </button>
-          <button className="btn btn-ghost w-full">⚙️ Privacy Setting</button>
         </div>
-        <button onClick={logout} className="btn btn-ghost w-full">
+        <button
+          onClick={logout}
+          className="btn btn-ghost w-full text-black dark:text-black"
+        >
           Sign out
         </button>
       </aside>
 
       {/* Right card: Account Information form */}
-      <div className="rounded-2xl border border-gray-200 p-6">
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-display">Account Information</h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Update your personal details
             </p>
           </div>
           {!isEditing && (
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost text-black dark:text-black"
               onClick={() => setIsEditing(true)}
             >
               ✏️ Edit
@@ -239,43 +241,59 @@ export default function Profile() {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 text-sm">Username</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+                Username
+              </label>
               <input
-                className="input bg-gray-100"
+                className="input bg-gray-100 text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 value={user?.email ? user.email.split("@")[0] : ""}
                 disabled
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm">Email</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+                Email
+              </label>
               <input
-                className="input bg-gray-100"
+                className="input bg-gray-100 text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 value={user?.email || ""}
                 disabled
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm">Full Name</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+                Full Name
+              </label>
               <input
-                className={`input ${!isEditing ? "bg-gray-100" : ""}`}
+                className={`input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 ${
+                  !isEditing ? "bg-gray-100 dark:bg-gray-800/70" : ""
+                }`}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 disabled={!isEditing}
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm">Phone Number</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+                Phone Number
+              </label>
               <input
-                className={`input ${!isEditing ? "bg-gray-100" : ""}`}
+                className={`input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 ${
+                  !isEditing ? "bg-gray-100 dark:bg-gray-800/70" : ""
+                }`}
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 disabled={!isEditing}
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block mb-1 text-sm">Location</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+                Location
+              </label>
               <input
-                className={`input ${!isEditing ? "bg-gray-100" : ""}`}
+                className={`input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 ${
+                  !isEditing ? "bg-gray-100 dark:bg-gray-800/70" : ""
+                }`}
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
                 disabled={!isEditing}
@@ -284,10 +302,12 @@ export default function Profile() {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm">Bio</label>
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+              Bio
+            </label>
             <textarea
-              className={`input min-h-[96px] ${
-                !isEditing ? "bg-gray-100" : ""
+              className={`input min-h-[96px] bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 ${
+                !isEditing ? "bg-gray-100 dark:bg-gray-800/70" : ""
               }`}
               value={form.bio}
               onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -298,7 +318,7 @@ export default function Profile() {
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost text-black dark:text-black"
               onClick={onCancel}
               disabled={!isEditing}
             >
@@ -331,9 +351,11 @@ export default function Profile() {
               )}
               <div className="grid md:grid-cols-3 gap-3">
                 <div>
-                  <label className="block mb-1 text-sm">Current Password</label>
+                  <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+                    Current Password
+                  </label>
                   <input
-                    className="input"
+                    className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                     type="password"
                     value={pwd.current_password}
                     onChange={(e) =>
@@ -342,9 +364,11 @@ export default function Profile() {
                   />
                 </div>
                 <div>
-                  <label className="block mb-1 text-sm">New Password</label>
+                  <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
+                    New Password
+                  </label>
                   <input
-                    className="input"
+                    className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                     type="password"
                     value={pwd.new_password}
                     onChange={(e) =>
@@ -353,11 +377,11 @@ export default function Profile() {
                   />
                 </div>
                 <div>
-                  <label className="block mb-1 text-sm">
+                  <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
                     Confirm New Password
                   </label>
                   <input
-                    className="input"
+                    className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                     type="password"
                     value={pwd.confirm}
                     onChange={(e) =>

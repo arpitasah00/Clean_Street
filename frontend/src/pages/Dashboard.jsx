@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import { api, fetchRecentUpdates } from "../api/client";
 
 export default function Dashboard() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [items, setItems] = useState([]); // recent complaints for live Activity
   const [updates, setUpdates] = useState([]); // recent admin/user actions
   const [all, setAll] = useState([]); // all complaints for global stats
@@ -44,6 +45,15 @@ export default function Dashboard() {
       {error && <p className="text-red-600">{error}</p>}
       {!loading && !error && (
         <>
+          <div className="mb-4">
+            <h1 className="text-2xl font-display text-gray-900 dark:text-white">
+              {user?.name ? `Hi, ${user.name}` : "Welcome back"}
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Here&apos;s a quick overview of your complaints and updates.
+            </p>
+          </div>
+
           {/* Top stats row (card style to match screenshot) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <StatCard icon="⚠️" value={counts.total} label="Total Issues" />
@@ -59,7 +69,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8">
             <div className="space-y-4">
               {/* Activity card (unchanged live updates) */}
-              <div className="rounded-2xl border border-gray-200 shadow-sm bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-700">
                 <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="font-medium">Activity</h2>
                   <span className="text-xs text-green-600 bg-green-50 border border-green-200 rounded-md px-2 py-0.5">
@@ -95,19 +105,19 @@ export default function Dashboard() {
               </div>
 
               {/* Recent Updates card (admin panel activities) */}
-              <div className="rounded-2xl border border-gray-200 shadow-sm bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-700">
                 <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="font-medium">Recent Updates</h2>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        const logs = await fetchRecentUpdates(token);
-                        setUpdates(logs);
-                      } catch (e) {}
-                    }}
-                    className="text-xs px-2 py-0.5 rounded border border-gray-200 hover:bg-gray-50"
-                  >
+                   <button
+                     type="button"
+                     onClick={async () => {
+                       try {
+                         const logs = await fetchRecentUpdates(token);
+                         setUpdates(logs);
+                       } catch (e) {}
+                     }}
+                     className="text-xs px-2 py-0.5 rounded border border-gray-200 bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-700"
+                   >
                     Refresh
                   </button>
                 </div>
@@ -144,7 +154,7 @@ export default function Dashboard() {
 
             <aside className="space-y-4">
               {/* Quick Action */}
-              <div className="rounded-2xl border border-gray-200 p-4 bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-700">
                 <h3 className="font-medium mb-2">Quick Action</h3>
                 <div className="space-y-2">
                   <a href="/report" className="btn btn-primary w-full">
@@ -153,16 +163,16 @@ export default function Dashboard() {
                       Report New Issue
                     </span>
                   </a>
-                  <a href="/complaints" className="btn btn-ghost w-full">
+                  <a href="/complaints" className="btn btn-ghost w-full text-black dark:text-black">
                     <span className="inline-flex items-center gap-3">
-                      <ListIcon className="w-4 h-4 text-gray-500" />
+                      <ListIcon className="w-4 h-4 text-black dark:text-black" />
                       View All Complaints
                     </span>
                   </a>
                 </div>
               </div>
               {/* Support Team */}
-              <div className="rounded-2xl border border-gray-200 p-4 bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-700">
                 <h3 className="font-medium mb-1">Support Team</h3>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                   <span className="w-6 h-6 rounded-full bg-green-50 text-green-700 flex items-center justify-center border border-green-200">
@@ -173,9 +183,12 @@ export default function Dashboard() {
                     <div className="text-xs text-gray-500">Available 24/7</div>
                   </div>
                 </div>
-                <button className="btn btn-ghost w-full">
+                <Link
+                  to="/contact"
+                  className="btn btn-ghost w-full text-center text-black dark:text-black"
+                >
                   Contact Support
-                </button>
+                </Link>
               </div>
             </aside>
           </div>
@@ -187,7 +200,7 @@ export default function Dashboard() {
 
 function StatCard({ icon, value, label }) {
   return (
-    <div className="group rounded-2xl border border-gray-200 bg-white shadow-sm p-4 md:p-6 min-h-[120px] md:min-h-[140px] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300">
+    <div className="group rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm p-4 md:p-6 min-h-[120px] md:min-h-[140px] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-700">
       <div className="flex flex-col items-center justify-center text-center h-full">
         <div className="text-2xl md:text-3xl text-gray-700 mb-2 transition-transform duration-200 group-hover:scale-110">{icon}</div>
         <div className="text-2xl md:text-3xl font-semibold leading-none transition-transform duration-200 group-hover:scale-[1.03]">

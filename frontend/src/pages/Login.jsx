@@ -24,11 +24,11 @@ export default function Login() {
   return (
     <section className="grid lg:grid-cols-2 items-start gap-0 lg:gap-x-2 max-w-[1200px] mx-auto py-8 lg:py-12">
       {/* Illustration */}
-      <div className="hidden lg:flex items-start justify-end lg:px-0 pt-0">
+      <div className="hidden lg:flex items-start justify-end lg:px-0 pt-0 group">
         <img
           src={loginImg}
           alt="Clean Street illustration"
-          className="w-full max-w-[32rem] lg:w-[32rem] h-auto object-contain"
+          className="w-full max-w-[32rem] lg:w-[32rem] h-auto object-contain transform transition-transform duration-500 ease-out group-hover:scale-105"
         />
       </div>
 
@@ -39,7 +39,7 @@ export default function Login() {
             <img
               src={lamp}
               alt="Lamp"
-              className="row-span-2 h-32 w-auto lg:h-[12rem] object-contain -ml-1"
+              className="row-span-2 h-32 w-auto lg:h-[12rem] object-contain -ml-1 drop-shadow-[0_0_28px_rgba(251,191,36,0.95)] dark:drop-shadow-[0_0_52px_rgba(251,191,36,1)]"
             />
             <div className="lg:-ml-3 lg:mt-12">
               <h1 className="font-display text-4xl lg:text-[2.75rem] leading-none">
@@ -81,18 +81,10 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-2.5 text-right">
-            <button className="text-sm text-brand-700 hover:underline">
-              Forgot Password?
-            </button>
-          </div>
-
           <div className="mt-3 space-y-2">
-            <button className="btn btn-ghost w-full py-1.5">
-              <span className="inline-flex items-center justify-center gap-2">
-                <GoogleIcon className="w-4 h-4" />
-                Continue with Google
-              </span>
+            <button className="w-full py-1.5 border border-gray-300 dark:border-gray-600 bg-white text-gray-900 rounded-md hover:bg-gray-50 flex items-center justify-center gap-2 shadow-sm">
+              <GoogleIcon className="w-4 h-4" />
+              <span>Continue with Google</span>
             </button>
           </div>
 

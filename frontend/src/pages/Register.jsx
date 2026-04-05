@@ -39,17 +39,17 @@ export default function Register() {
   return (
   <section className="grid lg:grid-cols-2 items-stretch gap-0 max-w-[1200px] mx-auto py-4 lg:py-6">
       {/* Illustration left */}
-  <div className="hidden lg:flex items-center justify-end lg:px-0 pt-0 lg:-mr-px lg:h-[600px]">
+  <div className="hidden lg:flex items-center justify-end lg:px-0 pt-0 lg:-mr-px lg:h-[600px] group">
         <img
           src={registerImg}
           alt="Register illustration"
-          className="w-full max-w-md h-full object-contain"
+          className="w-full max-w-md h-full object-contain transform transition-transform duration-500 ease-out group-hover:scale-105"
         />
       </div>
 
       {/* Form right */}
   <div className="flex items-center justify-center lg:justify-start pt-0 pb-0 px-6 lg:px-0 lg:h-[600px]">
-  <div className="w-full max-w-md h-full relative p-5 rounded-xl shadow-soft bg-white/85 backdrop-blur-sm overflow-y-auto flex flex-col">
+  <div className="w-full max-w-md h-full relative p-5 rounded-xl shadow-soft bg-white/85 backdrop-blur-sm overflow-y-auto flex flex-col text-gray-900">
           {/* subtle earth background */}
           <img
             src={regEarth}

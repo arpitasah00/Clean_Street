@@ -14,7 +14,8 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
 });
-router.get("/", authRequired, listAll);
+// Public list of complaints (no auth required)
+router.get("/", listAll);
 router.get("/recent", authRequired, listRecent);
 router.get("/nearby", authRequired, requireRoles('admin','volunteer'), listNearby);
 // Accept multiple photos under the 'photos' field (up to 6)

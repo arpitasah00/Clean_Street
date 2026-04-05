@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api, fetchComments, postComment, reactComment } from "../api/client";
 
@@ -30,10 +31,6 @@ export default function Complaints() {
       .then((data) => {
         if (!mounted) return;
         setItems(data);
-        // Default location filter to user's registered location if available
-        if (user?.location) {
-          setLocationFilter((user.location || "").trim().toLowerCase());
-        }
       })
       .finally(() => mounted && setLoading(false));
     return () => (mounted = false);
@@ -52,8 +49,8 @@ export default function Complaints() {
             (list || [])
               .map((u) => (u.location || "").trim())
               .filter(Boolean)
-              .map((s) => s.toLowerCase())
-          )
+              .map((s) => s.toLowerCase()),
+          ),
         ).sort();
         setUserLocations(locs);
       } catch {
@@ -97,7 +94,7 @@ export default function Complaints() {
         body,
       });
       setItems((prev) =>
-        prev.map((x) => (x._id === updated._id ? updated : x))
+        prev.map((x) => (x._id === updated._id ? updated : x)),
       );
       if (selected && selected._id === c._id) setSelected(updated);
     } catch (e) {
@@ -129,7 +126,7 @@ export default function Complaints() {
             } catch {
               return [c._id, { up: 0, down: 0, comments: 0 }];
             }
-          })
+          }),
         );
         if (!mounted) return;
         const next = {};
@@ -221,8 +218,8 @@ export default function Complaints() {
             ? null
             : "like"
           : currentDislike
-          ? null
-          : "dislike";
+            ? null
+            : "dislike";
       await reactComment(comment._id, nextAction, token);
       setComments((prev) =>
         prev.map((c) => {
@@ -248,7 +245,7 @@ export default function Complaints() {
             myDislike = false;
           }
           return { ...c, likeCount, dislikeCount, myLike, myDislike };
-        })
+        }),
       );
     } catch (e) {
       /* ignore temporary errors */
@@ -360,17 +357,17 @@ export default function Complaints() {
 
   const userLocNorm = (user?.location || "").trim().toLowerCase();
   const fallbackLocs = Array.from(
-    new Set(items.map((it) => cityFromAddress(it.address)).filter(Boolean))
+    new Set(items.map((it) => cityFromAddress(it.address)).filter(Boolean)),
   );
   const baseLocs =
     userLocations && userLocations.length ? userLocations : fallbackLocs;
   const distinctLocations = Array.from(
-    new Set([...baseLocs, ...(userLocNorm ? [userLocNorm] : [])])
+    new Set([...baseLocs, ...(userLocNorm ? [userLocNorm] : [])]),
   ).sort();
   const distinctTypes = Array.from(
-    new Set(items.map((it) => classifyType(it)).filter(Boolean))
+    new Set(items.map((it) => classifyType(it)).filter(Boolean)),
   ).sort((a, b) =>
-    a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b)
+    a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b),
   );
 
   const filteredItems = items.filter((c) => {
@@ -382,12 +379,12 @@ export default function Complaints() {
   });
 
   return (
-    <section className="max-w-6xl mx-auto px-3 py-5">
+    <section className="max-w-6xl mx-auto px-3 py-5 text-gray-900 dark:text-gray-50">
       <div className="flex items-center justify-between gap-3 mb-3">
         <h1 className="text-xl font-semibold">All Complaints</h1>
         {/* Filters on the right */}
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <div className="text-gray-600 flex items-center gap-2">
+          <div className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
             <svg
               viewBox="0 0 24 24"
               width="16"
@@ -406,7 +403,7 @@ export default function Complaints() {
           </div>
           {/* Location */}
           <select
-            className="px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
           >
@@ -419,7 +416,7 @@ export default function Complaints() {
           </select>
           {/* Type */}
           <select
-            className="px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
           >
@@ -436,7 +433,7 @@ export default function Complaints() {
               setLocationFilter("all");
               setTypeFilter("all");
             }}
-            className="text-indigo-600 hover:underline"
+            className="text-indigo-600 hover:text-indigo-800"
           >
             Clear Filters
           </button>
@@ -452,7 +449,7 @@ export default function Complaints() {
             return (
               <div
                 key={c._id}
-                className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
+                className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden dark:bg-gray-900 dark:border-gray-800"
               >
                 {c.photos && c.photos.length > 0 ? (
                   <img
@@ -479,7 +476,7 @@ export default function Complaints() {
                         <option value="resolved">Resolved</option>
                       </select>
                     ) : (
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full dark:bg-blue-500/20 dark:text-blue-200">
                         {prettyStatus(c.status)}
                       </span>
                     )}
@@ -490,11 +487,13 @@ export default function Complaints() {
                   <h3 className="font-medium text-gray-900 mt-2 text-sm">
                     {c.title}
                   </h3>
-                  <p className="text-xs text-gray-600 line-clamp-2">
+                  <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
                     {c.description}
                   </p>
                   {c.address && (
-                    <p className="text-xs text-gray-500 mt-1">📍 {c.address}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      📍 {c.address}
+                    </p>
                   )}
                   <div className="mt-2">
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -503,46 +502,69 @@ export default function Complaints() {
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Progress: {progress}%
                     </p>
                   </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  {user ? (
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <button
+                          className={`px-2 py-0.5 text-xs rounded border flex items-center gap-1 ${
+                            myVotes[c._id] === "up"
+                              ? "bg-gray-900 text-white border-gray-900"
+                              : "border-gray-200"
+                          }`}
+                          onClick={() => toggleVote(c, "up")}
+                        >
+                          👍 {s.up}
+                        </button>
+                        <button
+                          className={`px-2 py-0.5 text-xs rounded border flex items-center gap-1 ${
+                            myVotes[c._id] === "down"
+                              ? "bg-gray-900 text-white border-gray-900"
+                              : "border-gray-200"
+                          }`}
+                          onClick={() => toggleVote(c, "down")}
+                        >
+                          👎 {s.down}
+                        </button>
+                        <button className="px-2 py-0.5 text-xs rounded border border-gray-200">
+                          💬 {s.comments}
+                        </button>
+                      </div>
                       <button
-                        className={`px-2 py-0.5 text-xs rounded border flex items-center gap-1 ${
-                          myVotes[c._id] === "up"
-                            ? "bg-gray-900 text-white border-gray-900"
-                            : "border-gray-200"
-                        }`}
-                        onClick={() => toggleVote(c, "up")}
+                        className="text-blue-600 text-xs font-medium hover:text-blue-800"
+                        onClick={() => {
+                          setSelected(c);
+                          loadComments(c);
+                        }}
                       >
-                        👍 {s.up}
-                      </button>
-                      <button
-                        className={`px-2 py-0.5 text-xs rounded border flex items-center gap-1 ${
-                          myVotes[c._id] === "down"
-                            ? "bg-gray-900 text-white border-gray-900"
-                            : "border-gray-200"
-                        }`}
-                        onClick={() => toggleVote(c, "down")}
-                      >
-                        👎 {s.down}
-                      </button>
-                      <button className="px-2 py-0.5 text-xs rounded border border-gray-200">
-                        💬 {s.comments}
+                        View
                       </button>
                     </div>
-                    <button
-                      className="text-blue-600 text-xs font-medium hover:underline"
-                      onClick={() => {
-                        setSelected(c);
-                        loadComments(c);
-                      }}
-                    >
-                      View
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="mt-3 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 text-gray-500 dark:text-gray-300">
+                        <span className="text-sm">↪</span>
+                        <Link
+                          to="/login"
+                          className="text-red-500 font-medium hover:text-red-600"
+                        >
+                          Login to interact
+                        </Link>
+                      </div>
+                      <button
+                        className="text-blue-600 text-xs font-medium hover:text-blue-800"
+                        onClick={() => {
+                          setSelected(c);
+                          loadComments(c);
+                        }}
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -557,7 +579,7 @@ export default function Complaints() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-xl shadow-lg w-full max-w-md max-h-[90vh] flex flex-col"
+            className="bg-white rounded-xl shadow-lg w-full max-w-md max-h-[90vh] flex flex-col dark:bg-gray-900 dark:text-gray-50"
           >
             {selected.photos && selected.photos.length > 0 && (
               <div className="relative w-full h-56 bg-gray-50 flex items-center justify-center">
@@ -570,12 +592,12 @@ export default function Complaints() {
                   <>
                     <button
                       type="button"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border border-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border border-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow text-gray-900"
                       onClick={() =>
                         setPhotoIndex(
                           (i) =>
                             (i - 1 + selected.photos.length) %
-                            selected.photos.length
+                            selected.photos.length,
                         )
                       }
                       aria-label="Previous image"
@@ -597,7 +619,7 @@ export default function Complaints() {
                     </button>
                     <button
                       type="button"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border border-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border border-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow text-gray-900"
                       onClick={() =>
                         setPhotoIndex((i) => (i + 1) % selected.photos.length)
                       }
@@ -652,11 +674,13 @@ export default function Complaints() {
             )}
             <div className="p-4 flex-1 overflow-y-auto space-y-3">
               <h2 className="text-lg font-semibold">{selected.title}</h2>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+              <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">
                 {selected.description}
               </p>
               {selected.address && (
-                <p className="text-xs text-gray-500">📍 {selected.address}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  📍 {selected.address}
+                </p>
               )}
               <div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -667,7 +691,7 @@ export default function Complaints() {
                     }}
                   ></div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Progress: {progressFromStatus(selected.status)}%
                 </p>
               </div>
@@ -696,7 +720,7 @@ export default function Complaints() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
-                              <div className="text-xs font-semibold">
+                              <div className="text-xs font-semibold text-gray-900">
                                 {com.author?.name || "User"}
                               </div>
                               <div className="text-[10px] text-gray-400">
@@ -717,40 +741,44 @@ export default function Complaints() {
                                 />
                               </div>
                             )}
-                            <div className="mt-2 flex items-center gap-4 text-[11px] text-gray-600">
-                              <button
-                                onClick={() => toggleReact(com, "like")}
-                                className={`inline-flex items-center gap-1 ${
-                                  com.myLike ? "text-gray-900 font-medium" : ""
-                                }`}
-                              >
-                                👍 <span>{com.likeCount || 0}</span>
-                              </button>
-                              <button
-                                onClick={() => toggleReact(com, "dislike")}
-                                className={`inline-flex items-center gap-1 ${
-                                  com.myDislike
-                                    ? "text-gray-900 font-medium"
-                                    : ""
-                                }`}
-                              >
-                                👎 <span>{com.dislikeCount || 0}</span>
-                              </button>
-                              <button
-                                onClick={() => setReplyTo(com._id)}
-                                className="hover:underline"
-                              >
-                                Reply
-                              </button>
-                              {canDeleteComment(com) && (
+                            {user && (
+                              <div className="mt-2 flex items-center gap-4 text-[11px] text-gray-600">
                                 <button
-                                  onClick={() => removeComment(com)}
-                                  className="text-red-500 hover:underline"
+                                  onClick={() => toggleReact(com, "like")}
+                                  className={`inline-flex items-center gap-1 ${
+                                    com.myLike
+                                      ? "text-gray-900 font-medium"
+                                      : ""
+                                  }`}
                                 >
-                                  Delete
+                                  👍 <span>{com.likeCount || 0}</span>
                                 </button>
-                              )}
-                            </div>
+                                <button
+                                  onClick={() => toggleReact(com, "dislike")}
+                                  className={`inline-flex items-center gap-1 ${
+                                    com.myDislike
+                                      ? "text-gray-900 font-medium"
+                                      : ""
+                                  }`}
+                                >
+                                  👎 <span>{com.dislikeCount || 0}</span>
+                                </button>
+                                <button
+                                  onClick={() => setReplyTo(com._id)}
+                                  className="hover:underline"
+                                >
+                                  Reply
+                                </button>
+                                {canDeleteComment(com) && (
+                                  <button
+                                    onClick={() => removeComment(com)}
+                                    className="text-red-500 hover:text-red-600"
+                                  >
+                                    Delete
+                                  </button>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </li>
@@ -758,42 +786,56 @@ export default function Complaints() {
                   </ul>
                 )}
                 <div className="mt-3">
-                  {replyTo && (
-                    <div className="mb-2 text-[11px] text-gray-600">
-                      Replying to a comment •{" "}
-                      <button
-                        className="underline"
-                        onClick={() => setReplyTo(null)}
+                  {user ? (
+                    <>
+                      {replyTo && (
+                        <div className="mb-2 text-[11px] text-gray-600">
+                          Replying to a comment •{" "}
+                          <button
+                            className="underline"
+                            onClick={() => setReplyTo(null)}
+                          >
+                            cancel
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          className="flex-1 border rounded px-2 py-2 text-xs bg-white text-gray-900 dark:bg-white dark:text-gray-900"
+                          placeholder="Add a comment..."
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                        />
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            setCommentFile(e.target.files?.[0] || null)
+                          }
+                          className="text-[10px]"
+                        />
+                        <button
+                          className="px-3 py-2 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700 disabled:opacity-50"
+                          onClick={submitComment}
+                          disabled={commentBusy}
+                        >
+                          Post
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-[11px] text-gray-500">
+                      <Link
+                        to="/login"
+                        className="text-red-500 font-medium hover:text-red-600"
                       >
-                        cancel
-                      </button>
-                    </div>
+                        Login
+                      </Link>{" "}
+                      to comment or react on this report.
+                    </p>
                   )}
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      className="flex-1 border rounded px-2 py-2 text-xs"
-                      placeholder="Add a comment..."
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                    />
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        setCommentFile(e.target.files?.[0] || null)
-                      }
-                      className="text-[10px]"
-                    />
-                    <button
-                      className="px-3 py-2 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-700 disabled:opacity-50"
-                      onClick={submitComment}
-                      disabled={commentBusy}
-                    >
-                      Post
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>

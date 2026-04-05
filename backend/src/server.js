@@ -21,9 +21,9 @@ app.use(express.json({ limit: "10mb" }));
 
 // Initialize ImageKit SDK
 const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "",
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "",
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || "",
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
 const PORT = process.env.PORT;
@@ -37,7 +37,9 @@ mongoose
     process.exit(1);
   });
 
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
+app.get("/", (_req, res) =>
+  res.json({ message: "Welcome to Clean Street API" }),
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -88,13 +90,13 @@ app.post(
       const updated = await User.findByIdAndUpdate(
         req.user.id,
         { $set: { profile_photo: publicUrl } },
-        { new: true }
+        { new: true },
       ).select("-password");
       res.json({ message: "Uploaded", url: publicUrl, user: updated });
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 app.use((err, _req, res, _next) => {
@@ -105,5 +107,5 @@ app.use((err, _req, res, _next) => {
 });
 
 app.listen(PORT, () =>
-  console.log(`API listening on http://localhost:${PORT}`)
+  console.log(`API listening on http://localhost:${PORT}`),
 );

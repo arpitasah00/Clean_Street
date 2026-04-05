@@ -169,9 +169,11 @@ export default function ReportIssue() {
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-display mb-4">Report a Civic Issue</h1>
+      <h1 className="text-2xl font-display mb-4 text-gray-900 dark:text-white">
+        Report a Civic Issue
+      </h1>
 
-      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm">
         <form className="p-4 space-y-4" onSubmit={submit}>
           {error && <div className="text-red-600 text-sm">{error}</div>}
           {ok && <div className="text-green-600 text-sm">{ok}</div>}
@@ -179,9 +181,9 @@ export default function ReportIssue() {
           {/* Top grid: Title / Type */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 text-sm">Issue Title</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Issue Title</label>
               <input
-                className="input"
+                className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 placeholder="Brief description of the issue"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -189,9 +191,9 @@ export default function ReportIssue() {
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm">Issue Type</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Issue Type</label>
               <select
-                className="input"
+                className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 value={issueType}
                 onChange={(e) => setIssueType(e.target.value)}
               >
@@ -209,9 +211,9 @@ export default function ReportIssue() {
           {/* Grid: Priority / Address */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 text-sm">Priority Level</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Priority Level</label>
               <select
-                className="input"
+                className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
               >
@@ -223,9 +225,9 @@ export default function ReportIssue() {
               </select>
             </div>
             <div className="relative">
-              <label className="block mb-1 text-sm">Address</label>
+              <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Address</label>
               <input
-                className="input"
+                className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                 placeholder="Enter street address"
                 value={address}
                 onChange={(e) => {
@@ -256,7 +258,7 @@ export default function ReportIssue() {
                 }}
               />
               {suggestOpen && suggestions.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full max-h-56 overflow-auto bg-white border border-gray-200 rounded-xl shadow-sm divide-y">
+                <ul className="absolute z-10 mt-1 w-full max-h-56 overflow-auto bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm divide-y">
                   {suggestions.map((r, idx) => (
                     <li
                       key={`${r.place_id}-${idx}`}
@@ -276,11 +278,11 @@ export default function ReportIssue() {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm">
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">
               Nearby Landmark (Optional)
             </label>
             <input
-              className="input"
+              className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
               placeholder="e.g., Near City Hall"
               value={landmark}
               onChange={(e) => setLandmark(e.target.value)}
@@ -288,9 +290,9 @@ export default function ReportIssue() {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm">Description</label>
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Description</label>
             <textarea
-              className="input min-h-32"
+              className="input min-h-32 bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
               placeholder="Describe the issue in detail..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -299,10 +301,12 @@ export default function ReportIssue() {
 
           {/* Photo upload (optional, up to 6) */}
           <div>
-            <label className="block mb-1 text-sm">Photos</label>
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Photos</label>
             <div
               className={`rounded-xl border-2 border-dashed p-6 text-sm flex flex-col items-center justify-center gap-2 text-center select-none transition-colors ${
-                dragOver ? "border-blue-500 bg-blue-50" : "border-gray-300"
+                dragOver
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10"
+                  : "border-gray-300 dark:border-gray-700 bg-transparent"
               }`}
               onDragOver={(e) => {
                 e.preventDefault();
@@ -345,7 +349,7 @@ export default function ReportIssue() {
                       </div>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+                  <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
                     <div>{photos.length} / 6 selected</div>
                     <div>
                       Drag&Drop more or{" "}
@@ -356,13 +360,13 @@ export default function ReportIssue() {
               ) : (
                 <>
                   <CloudIcon className="w-8 h-8 text-gray-400" />
-                  <div className="text-gray-700 font-medium">
+                  <div className="text-gray-700 dark:text-gray-200 font-medium">
                     Drag&Drop files here
                   </div>
-                  <div className="text-xs text-gray-400">or</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500">or</div>
                   <button
                     type="button"
-                    className="btn btn-ghost btn-sm"
+                    className="btn btn-ghost btn-sm bg-white text-gray-900 hover:bg-gray-100 dark:bg-white dark:text-gray-900"
                     onClick={(e) => {
                       e.stopPropagation();
                       document.getElementById("complaint-photo-input")?.click();
@@ -370,7 +374,7 @@ export default function ReportIssue() {
                   >
                     Browse
                   </button>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     PNG, JPG up to 5MB
                   </div>
                 </>
@@ -389,22 +393,22 @@ export default function ReportIssue() {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm">Location on Map</label>
-            <div className="overflow-hidden rounded-xl border border-gray-200">
+            <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Location on Map</label>
+            <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <LeafletMap
                 center={center}
                 onCenterChange={(c) => setCenter({ lat: c.lat, lng: c.lng })}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Move the map or pick an address; coordinates are detected
               automatically.
             </p>
             <div className="grid md:grid-cols-2 gap-4 mt-2">
               <div>
-                <label className="block mb-1 text-sm">Coordinates</label>
+                <label className="block mb-1 text-sm text-gray-700 dark:text-gray-200">Coordinates</label>
                 <input
-                  className="input"
+                  className="input bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                   value={`${Number(center.lat).toFixed(6)}, ${Number(
                     center.lng
                   ).toFixed(6)}`}

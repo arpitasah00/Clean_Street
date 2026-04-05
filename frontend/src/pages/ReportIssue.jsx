@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/client";
 import {
@@ -130,11 +131,9 @@ export default function ReportIssue() {
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           q
         )}&limit=5&addressdetails=1`;
-        const res = await fetch(url, {
+        const { data } = await axios.get(url, {
           headers: { Accept: "application/json" },
         });
-        if (!res.ok) return;
-        const data = await res.json();
         setSuggestOpen(true);
         setSuggestions(data);
         if (Array.isArray(data) && data.length > 0) {
